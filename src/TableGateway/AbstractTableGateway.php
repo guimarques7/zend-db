@@ -370,6 +370,14 @@ abstract class AbstractTableGateway implements TableGatewayInterface
 
         // apply preUpdate features
         $this->featureSet->apply(EventFeature::EVENT_PRE_UPDATE, [$update]);
+        // Similar problem with aliases to that found and fixed in INSERTs
+        // See https://github.com/zendframework/zf2/issues/7311
+        $unaliasedTable = false;
+        if (is_array($updateState['table'])) {
+            $tableData      = array_values($updateState['table']);
+            $unaliasedTable = array_shift($tableData);
+            $update->table($unaliasedTable);
+        }
 
         $statement = $this->sql->prepareStatementForSqlObject($update);
         $result = $statement->execute();
